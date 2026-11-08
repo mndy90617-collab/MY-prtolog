@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نظام إدارة وتحليل نتائج الطلاب</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: #eef2f7;
+      color: #1f2937;
+    }
+
+    header {
+      background: #1f3a5f;
+      color: #fff;
+      text-align: center;
+      padding: 32px 16px;
+    }
+    header h1 { margin: 0 0 8px; font-size: 1.8rem; }
+    header p  { margin: 0; opacity: .85; }
+
+    main { max-width: 720px; margin: 32px auto; padding: 0 16px; }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #1f3a5f;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    .card ol, .card ul { line-height: 2; padding-inline-start: 24px; }
+
+    kbd {
+      background: #1f3a5f;
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .9rem;
+    }
+
+    footer { text-align: center; color: #6b7280; font-size: .9rem; padding: 16px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>نظام إدارة وتحليل نتائج الطلاب</h1>
+    <p>Console-Based System</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>طريقة مشاهدة النتائج</h2>
+      <ol>
+        <li>اضغط <kbd>F12</kbd> لفتح أدوات المطور.</li>
+        <li>اختر تبويب <kbd>Console</kbd>.</li>
+        <li>هتلاقي تقرير الطلاب ولجنة الرأفة ومتوسط الرأفة.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>محتوى التقرير</h2>
+      <ul>
+        <li>الاسم والمتوسط والتقدير والنتيجة لكل طالب.</li>
+        <li>الطلاب المتعثرون الذين شملتهم الرأفة.</li>
+        <li>متوسط الطلاب المتعثرين بعد التعديل.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>مشروع نظام إدارة نتائج الطلاب</footer>
+
+  <script>
+    // ==========================================================
+    // نظام إدارة وتحليل نتائج الطلاب (Console-Based)
+    // ==========================================================
+
+    // ---------- 1. هيكلة بيانات الطالب (Class & Constructor) ----------
+    class Student {
+      constructor(id, name, grades, attendance) {
+        this.id = id;                 // رقم الجلوس
+        this.name = name;             // الاسم
+        this.grades = grades;         // مصفوفة درجات 3 مواد
+        this.attendance = attendance; // نسبة الحضور
+      }
+
+      // ---------- 2. دوال التحليل الأكاديمي (Methods) ----------
+
+      // حساب المتوسط باستخدام reduce
+      calculateAverage() {
+        const total = this.grades.reduce((sum, grade) => sum + grade, 0);
+        return total / this.grades.length;
+      }
+
+      // التقدير بالحروف باستخدام if / else
+      getGrade(average) {
+        if (average >= 90) {
+          return "A";
+        } else if (average >= 80) {
+          return "B";
+        } else if (average >= 70) {
+          return "C";
+        } else if (average >= 60) {
+          return "D";
+        } else if (average >= 50) {
+          return "E";
+        } else {
+          return "F";
+        }
+      }
+
+      // النتيجة النهائية: المتوسط >= 50 && الحضور >= 75
+      getFinalResult() {
+        const average = this.calculateAverage();
+        if (average >= 50 && this.attendance >= 75) {
+          return "ناجح";
+        } else {
+          return "يحتاج مراجعة";
+        }
+      }
+    }
+
+    // ---------- 3. نظام تشغيل الجامعة (Objects Array) ----------
+    const studentsList = [
+      new Student(1001, "أحمد علي",    [90, 85, 95], 92),  // متوسط 90
+      new Student(1002, "سارة محمد",   [45, 40, 50], 85),  // متعثرة (45)
+      new Student(1003, "عمر حسن",     [48, 47, 49], 80),  // متعثر (48)
+      new Student(1004, "منى إبراهيم", [60, 55, 65], 70)   // متوسط 60 لكن الحضور أقل من 75
+    ];
+
+    // ---------- 4. لجنة الرأفة (Array Methods) ----------
+
+    // الاستخراج: filter للطلاب بين 40 و 49
+    const strugglingStudents = studentsList.filter((student) => {
+      const avg = student.calculateAverage();
+      return avg >= 40 && avg <= 49;
+    });
+
+    // المعالجة: map لإضافة 5 درجات رأفة (من غير تعديل الكائن الأصلي)
+    const mercyStudents = strugglingStudents.map((student) => {
+      const oldAverage = student.calculateAverage();
+      return {
+        id: student.id,
+        name: student.name,
+        oldAverage: oldAverage,
+        newAverage: oldAverage + 5
+      };
+    });
+
+    // التحليل: reduce لجمع المتوسطات الجديدة
+    const totalNewAverages = mercyStudents.reduce(
+      (sum, student) => sum + student.newAverage,
+      0
+    );
+
+    // متوسط الرأفة مع "درع الحماية" لمنع القسمة على صفر
+    let mercyAverage = 0;
+    if (mercyStudents.length > 0) {
+      mercyAverage = totalNewAverages / mercyStudents.length;
+    }
+
+    // ---------- 5. المخرجات (Console Logging) ----------
+
+    console.log("========== تقرير الطلاب ==========");
+    studentsList.forEach((student) => {
+      const average = student.calculateAverage();
+      console.log(
+        `الاسم: ${student.name} | المتوسط: ${average.toFixed(2)} | ` +
+        `التقدير: ${student.getGrade(average)} | النتيجة: ${student.getFinalResult()}`
+      );
+    });
+
+    console.log("\n========== الطلاب المتعثرون الذين شملتهم الرأفة ==========");
+    console.log(mercyStudents);
+    console.table(mercyStudents);
+
+    console.log("\n========== متوسط الطلاب المتعثرين بعد التعديل ==========");
+    console.log(`متوسط الرأفة: ${mercyAverage.toFixed(2)}`);
+  </script>
+</body>
+</html>
